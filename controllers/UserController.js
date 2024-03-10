@@ -1,8 +1,12 @@
 const userSchema = require("../models/UserModel")
+const encrypt = require("../utils/Encrypt")
 
 const createUser = async(req,res)=>{
     try{
-        const savedUser = await userSchema.create(req.body)
+
+        const hashedPasssword = encrypt.encrypPassword(req.body.password)
+        const userObj = Object.assign(req.body,{password:hashedPasssword})
+        const savedUser = await userSchema.create(userObj)
         res.status(201).json({
             message:"User created successfully",
             data:savedUser,
@@ -114,10 +118,48 @@ const updateUser = async(req,res)=>{
     }
 }
 
+
+const loginUser = async(req,res)=>{
+    try{
+        const email = req.body.email
+        const password = req.body.password
+
+        const userFromEmail = await userSchema.findOne({email:email})
+        if(userFromEmail!=null){
+            const flag = encrypt.comparePassword(password,userFromEmail.password)
+            if(flag==true){
+                res.status(200).json({
+                    message:"Logged in successfully",
+                    data:userFromEmail,
+                    flag:1
+                })
+            }else{
+                res.status(404).json({
+                    message:"User Not Found",
+                    flag:-1
+                })
+            }
+        }else{
+            res.status(404).json({
+                message:"Employee not found",
+                flag:-1
+            })
+        }
+
+    }catch(error){
+        res.status(500).json({
+            message:"erver error",
+            data:error,
+            flag:-1
+        })
+    }
+}
+
 module.exports = {
     createUser,
     getAllUsers,
     deleteUser,
     getUserById,
-    updateUser
+    updateUser,
+    loginUser
 }

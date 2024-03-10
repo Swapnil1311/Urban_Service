@@ -1,5 +1,59 @@
 const serviceSchema = require('../models/ServiceModel')
+const multer = require('multer')
+const path = require('path')
+const cloudinaryController = require("./CloudinaryController")
 
+const storage = multer.diskStorage({
+    filename:function(req,file,cb){
+        cb(null,file.originalname)
+    }
+})
+
+
+
+const upload = multer({
+    storage:storage,
+    limits:{fileSize:1000000}
+}).single('myFile')
+
+
+const fileUpload = async(req,res)=>{
+    upload(req,res,async(err)=>{
+        if(err){
+            res.status(500).json({
+                message:"Error while uploading file"
+            })
+        }else{
+            if(req.file == undefined){
+                res.status(400).json({
+                    message:"No file selected"
+                })
+            }else{
+                const result = await cloudinaryController.uploadFile(req.file.path)
+                console.log("upload controller..",result)
+                const serviceObj = {
+                    serviceName:req.body.serviceName,
+                    category:req.body.category,
+                    subCategory:req.body.subCategory,
+                    type:req.body.type,
+                    fees:req.body.fees,
+                    area:req.body.area,
+                    city:req.body.city,
+                    state:req.body.state,
+                    serviceprovider:req.body.serviceprovider,
+                    imageURL:result.secure_url
+
+
+                }
+                const savedService = await serviceSchema.create(serviceObj)
+                res.status(200).json({
+                    message:"File Uploaded Successfully",
+                    data:savedService
+                })
+            }
+        }
+    })
+}
 
 const createService = async(req,res)=>{
     try{
@@ -108,6 +162,33 @@ const updateService = async(req,res)=>{
     }
 }
 
+const getServiceByServiceProviderId = async(req,res)=>{
+    const serviceProviderId = req.params.id
+    try{
+        const services = await serviceSchema.find({serviceprovider:serviceProviderId})
+        // console.log(services)
+        if(services && services.length > 0 ){
+            res.status(200).json({
+                message:"Service Found",
+                data:services,
+                flag:1
+            })
+        }else{
+            res.status(404).json({
+                message:"No service Found",
+                flag:-1,
+                data:[]
+            })
+        }
+
+    }catch(error){
+        res.status(500).json({
+            message:"Internal Server Error",
+            data:error.message,
+            flag:-1
+        })
+    }
+}
 
 
 module.exports ={
@@ -115,5 +196,7 @@ module.exports ={
     getAllServices,
     getServiceById,
     deleteService,
-    updateService
+    updateService,
+    getServiceByServiceProviderId,
+    fileUpload
 }

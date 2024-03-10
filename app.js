@@ -1,7 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+const cors = require('cors')
+app.use(cors())
 const PORT = 4000
+
 
 
 //...Config...
@@ -34,6 +37,8 @@ const typeRoutes = require('./routes/TypeRoutes.js')
 const subCategoryRoutes = require('./routes/SubControllerRoutes.js')
 const serviceProviderRoutes = require('./routes/ServiceProviderRoutes.js')
 const serviceRoutes = require('./routes/ServiceRoutes.js')
+const fileUplaodRoutes = require('./routes/FileUploadRoutes.js')
+const bookingRoutes = require('./routes/BookingRoutes.js')
 
 
 
@@ -47,7 +52,8 @@ app.use("/types",typeRoutes)
 app.use("/subcategories",subCategoryRoutes)
 app.use("/serviceproviders",serviceProviderRoutes)
 app.use("/services",serviceRoutes)
-
+app.use("/upload",fileUplaodRoutes)
+app.use('/bookings',bookingRoutes)
 
 
 app.listen(PORT,()=>{

@@ -1,9 +1,12 @@
 const serviceproviderSchema = require("../models/ServiceProviderModel")
+const encrypt = require('../utils/Encrypt')
 
 
 const createServiceProvider = async (req,res)=>{
     try{
-        const savedserviceProvider = await serviceproviderSchema.create(req.body)
+        const hashedPasssword = encrypt.encrypPassword(req.body.password)
+        const serviceProviderObj = Object.assign(req.body,{password:hashedPasssword})
+        const savedserviceProvider = await serviceproviderSchema.create(serviceProviderObj)
         res.status(201).json({
             message:"Serviceprovider created successfully",
             data:savedserviceProvider,
@@ -108,6 +111,44 @@ const updateServiceProvider = async(req,res)=>{
     }
 }
 
+const loginServiceProvider = async (req,res)=>{
+    try{
+        const email = req.body.email;
+        const password = req.body.password
+
+        const serviceProviderFromEmail = await serviceproviderSchema.findOne({email:email})
+        if(serviceProviderFromEmail!=null){
+            const flag = encrypt.comparePassword(password, serviceProviderFromEmail.password);
+            if(flag==true){
+                res.status(200).json({
+                    message:"Logged in Successfully",
+                    data:serviceProviderFromEmail,
+                    flag:1
+                })
+            }else{
+                res.status(404).json({
+                    message: "ServiceProvider not found",
+                    flag:-1
+                })
+            }
+
+        }else{
+            res.status(404).json({
+                message: "ServiceProvider not found",
+                flag:-1
+            })
+        }
+
+    }catch(error){
+        res.status(500).json({
+            message:"erver Error",
+            data:error,
+            flag:-1
+        })
+    }
+}
+
+
 
 
 module.exports ={
@@ -115,5 +156,6 @@ module.exports ={
     getAllServiceProviders,
     getServiceProviderById,
     deleteServiceProvider,
-    updateServiceProvider
+    updateServiceProvider,
+    loginServiceProvider
 }

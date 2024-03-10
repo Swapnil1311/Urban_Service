@@ -13,7 +13,7 @@ const serviceSchema = new Schema({
 
     subCategory:{
         type:Schema.Types.ObjectId,
-        ref: 'Subcategory'
+        ref: 'SubCategory'
     },
 
     type:{
@@ -40,8 +40,11 @@ const serviceSchema = new Schema({
     serviceprovider:{
         type:Schema.Types.ObjectId,
         ref: 'ServiceProvider',
-    }
+    },
 
+    imageURL:{
+        type:String
+    }
 
 })
 
