@@ -21,7 +21,7 @@ const fileUpload = async(req,res)=>{
     upload(req,res,async(err)=>{
         if(err){
             res.status(500).json({
-                message:"Error while uploading file"
+                message:"Error while uploading file",
             })
         }else{
             if(req.file == undefined){
@@ -190,6 +190,23 @@ const getServiceByServiceProviderId = async(req,res)=>{
     }
 }
 
+const serviceFilter = async(req,res)=>{
+    console.log("Req query...",req.query)
+    const services = await serviceSchema.find({serviceName:{$regex:req.query.serviceName,$options: 'i'}}).populate("category").populate("subCategory").populate("type").populate("serviceprovider")
+    if(services && services.length>0){
+        res.status(200).json({
+            message:"Services Found Successfully",
+            data:services,
+            flag:1
+        })
+    }else{
+        res.status(404).json({
+            message:"No Service Found In Database",
+            data:[],
+            flag:-1
+        })
+    }
+}
 
 module.exports ={
     createService,
@@ -198,5 +215,6 @@ module.exports ={
     deleteService,
     updateService,
     getServiceByServiceProviderId,
-    fileUpload
+    fileUpload,
+    serviceFilter
 }

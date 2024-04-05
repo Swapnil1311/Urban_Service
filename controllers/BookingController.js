@@ -1,4 +1,5 @@
 const bookingSchema = require('../models/BookingModel')
+const ServiceModel = require('../models/ServiceModel');
 
 const createBooking = async(req,res)=>{
     try{
@@ -112,11 +113,69 @@ const updateBookingStatus = async(req,res) =>{
 }
 }
 
+const getBookingByUserId = async (req, res) => {
+    try {
+        const bookings = await bookingSchema.find({ user: req.params.id }).populate("service").populate("user").populate("serviceprovider");
+        res.status(200).json({
+            message: "Bookings fetched successfully by user ID",
+            data: bookings,
+            flag: 1
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Error",
+            data: error,
+            flag: -1
+        });
+    }
+};
+
+const getPendingBooking = async (req, res) => {
+    try {
+        const bookings = await bookingSchema.find({ status: 'pending', user: req.params.id }).populate("service").populate("user").populate("serviceprovider");
+        res.status(200).json({
+            message: "Pending bookings fetched successfully",
+            data: bookings,
+            flag: 1
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Error",
+            data: error,
+            flag: -1
+        });
+    }
+};
+
+const getDoneBooking = async (req, res) => {
+    try {
+        const bookings = await bookingSchema.find({ status: 'Booked', user: req.params.id }).populate("service").populate("user").populate("serviceprovider");
+        res.status(200).json({
+            message: "Done bookings fetched successfully",
+            data: bookings,
+            flag: 1
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Error",
+            data: error,
+            flag: -1
+        });
+    }
+};
+
+
+
+
+
 
 module.exports = {
     createBooking,
     getBookingById,
     getAllBooking,
     updateBookingById,
-    updateBookingStatus
-}
+    updateBookingStatus,
+    getBookingByUserId,
+    getPendingBooking,
+    getDoneBooking,
+};

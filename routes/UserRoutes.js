@@ -7,6 +7,8 @@ router.delete("/user/:id",userController.deleteUser)
 router.get("/user/:id",userController.getUserById)
 router.put("/user/:id",userController.updateUser)
 router.post('/user/login',userController.loginUser)
+router.post('/user/isUserExist',userController.isUserExist)
+router.post('/user/resetpassword',userController.resetPassword)
 
 
 
