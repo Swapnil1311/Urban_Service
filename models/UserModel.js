@@ -23,6 +23,19 @@ const userSchema = new Schema ({
     role:{
         type:Schema.Types.ObjectId,
         ref:'Role'
+    },
+
+    latitude:{
+        type:String
+    },
+
+    longitude:{
+        type:String,
+    },
+
+    address:{
+        type:Schema.Types.ObjectId,
+        ref:'Address'
     }
 
 })

@@ -3,36 +3,25 @@ const Schema = mongoose.Schema
 
 
 const addressSchema = new Schema({
-    addressName:{
-        type:String,
+    user:{
+        type:Schema.Types.ObjectId,
+        ref:"User",
     },
-    country:{
+    address:{
         type:String,
+        required:true,
     },
     city:{
         type:String,
+        required:true,
     },
     state:{
         type:String,
+        required:true
     },
-    pincode:{
-        type:Number,
-    },
-    houseNo:{
-        type:Number,
-    },
-    area:{
+    postalCode:{
         type:String,
-    },
-    landmark:{
-        type:String,
-    },
-    isDefault:{
-        type:Boolean,
-    },
-    user:{
-        type: Schema.Types.ObjectId,
-        ref:'User'
+        required:true
     }
 })
 

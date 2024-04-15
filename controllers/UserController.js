@@ -32,7 +32,7 @@ const createUser = async(req,res)=>{
 
 const getAllUsers = async(req,res)=>{
     try{
-        const users = await userSchema.find().populate("role")
+        const users = await userSchema.find().populate("role").populate('address')
         res.status(200).json({
             message:"User fetched successfully",
             data:users,
@@ -78,7 +78,7 @@ const deleteUser = async(req,res)=>{
 const getUserById = async(req,res)=>{
     try{
         const id = req.params.id
-        const user = await userSchema.findById(id).populate("role")
+        const user = await userSchema.findById(id).populate('address').populate('role')
         if(user==null){
             res.status(404).json({
                 message:"User not found",
@@ -272,111 +272,179 @@ const isUserExist = async (req, res) => {
 
 
 
+// const resetPassword = async (req, res) => {
+//     const email = req.body.email;
+//     const password = req.body.password;
+//     const otp = req.body.otp;
+//     const time = req.body.time;
+  
+//     console.log(email);
+//     console.log(password);
+  
+//     const getUser = await otpSchema.findOne({ email: email });
+//     const getServiceProvider = await otpSchema.findOne({email:email})
+//     if (getUser) {
+//       if (getUser.otp === otp) {
+//         //gettime ffrom otp object....
+//         //compsre for 30 seconds...
+//         const timeDifference = time - getUser.time;
+//         const is30SecondsGap = timeDifference >= 30000;
+//         if (is30SecondsGap) {
+//           res.status(401).json({
+//             message: "otp expired!!",
+//             flag: -1,
+//           });
+//           await otpSchema.findOneAndDelete({ email: email });
+//         } else {
+//           const hashedPassword = await encrypt.encrypPassword(password);
+  
+//           try {
+//             const updateUser = await userSchema.findOneAndUpdate(
+//               { email: email },
+//               { $set: { password: hashedPassword } }
+//             );
+//             //password rest...
+//             //delete otp record....
+//             await otpSchema.findOneAndDelete({ email: email });
+
+            
+  
+//             res.status(200).json({
+//               message: "Password updated successfully",
+//               flag: 1,
+//             });
+//           } catch (err) {
+//             console.log(err);
+//             res.status(500).json({
+//               message: "Error in updating password",
+//               flag: -1,
+//             });
+//           }
+//         }
+//       } else {
+//         ////delete otp record....
+//         await otpSchema.findOneAndDelete({ email: email });
+//         res.status(401).json({
+//           message: "invalid otp..",
+//           flag: -1,
+//         });
+//       }
+//     } else if(getServiceProvider){
+//         if (getServiceProvider.otp === otp) {
+//             //gettime ffrom otp object....
+//             //compsre for 30 seconds...
+//             const timeDifference = time - getServiceProvider.time;
+//             const is30SecondsGap = timeDifference >= 30000;
+//             if (is30SecondsGap) {
+//               res.status(401).json({
+//                 message: "otp expired!!",
+//                 flag: -1,
+//               });
+//               await otpSchema.findOneAndDelete({ email: email });
+//             } else {
+//               const hashedPassword = await encrypt.encrypPassword(password);
+      
+//               try {
+//                 const updateServiceProvider = await serviceProviderSchema.findOneAndUpdate(
+//                   { email: email },
+//                   { $set: { password: hashedPassword } }
+//                 );
+//                 console.log("updated serviceprovider...",updateServiceProvider);
+//                 //password rest...
+//                 //delete otp record....
+//                 await otpSchema.findOneAndDelete({ email: email });
+      
+//                 res.status(200).json({
+//                   message: "Password updated successfully",
+//                   flag: 1,
+//                 });
+//               } catch (err) {
+//                 console.log(err);
+//                 res.status(500).json({
+//                   message: "Error in updating password",
+//                   flag: -1,
+//                 });
+//               }
+//             }
+//           } else {
+//             ////delete otp record....
+//             await otpSchema.findOneAndDelete({ email: email });
+//             res.status(401).json({
+//               message: "invalid otp..",
+//               flag: -1,
+//             });
+//           }
+//     }else {
+//       //delete otp record....
+//       await otpSchema.findOneAndDelete({ email: email });
+//       res.status(500).json({
+//         message: "error...",
+//         flag: -1,
+//       });
+//     }
+//   }; 
+
 const resetPassword = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
     const otp = req.body.otp;
     const time = req.body.time;
   
-    console.log(email);
-    console.log(password);
+    console.log(email, password);
   
-    const getUser = await otpSchema.findOne({ email: email });
-    const getServiceProvider = await otpSchema.findOne({email:email})
-    if (getUser) {
-      if (getUser.otp === otp) {
-        //gettime ffrom otp object....
-        //compsre for 30 seconds...
-        const timeDifference = time - getUser.time;
+    const getuser = await otpSchema.findOne({ email: email });
+    console.log(getuser);
+    if (getuser) {
+      if (getuser.otp === otp) {
+  
+        const timeDifference = time - getuser.time 
         const is30SecondsGap = timeDifference >= 30000;
-        if (is30SecondsGap) {
-          res.status(401).json({
-            message: "otp expired!!",
-            flag: -1,
-          });
-          await otpSchema.findOneAndDelete({ email: email });
-        } else {
-          const hashedPassword = await encrypt.encrypPassword(password);
   
-          try {
-            const updateUser = await userSchema.findOneAndUpdate(
+        if(is30SecondsGap){
+          res.status(401).json({
+            message: "OTP is expired",
+            flag: -1,
+          })
+        }else{
+          const hashedPassword = await encrypt.encrypPassword(password);
+        try {
+          const updateUserPassword = await userSchema.findOneAndUpdate(
+            { email: email },
+            { $set: { password: hashedPassword } }
+          );
+          await otpSchema.findOneAndDelete({ email: email });
+          const updateServiceProviderPassword =
+            await serviceProviderSchema.findOneAndUpdate(
               { email: email },
               { $set: { password: hashedPassword } }
             );
-            //password rest...
-            //delete otp record....
-            await otpSchema.findOneAndDelete({ email: email });
-  
-            res.status(200).json({
-              message: "Password updated successfully",
-              flag: 1,
-            });
-          } catch (err) {
-            console.log(err);
-            res.status(500).json({
-              message: "Error in updating password",
-              flag: -1,
-            });
-          }
+          await otpSchema.findOneAndDelete({ email: email });
+          res.status(200).json({
+            message: "Password Updated Successfully",
+            flag: 1,
+          });
+        } catch (error) {
+          res.status(500).json({
+            message: "Error in updating Password",
+            flag: -1,
+          });
         }
+        }
+  
+        
       } else {
-        ////delete otp record....
+        // delete otp
         await otpSchema.findOneAndDelete({ email: email });
         res.status(401).json({
-          message: "invalid otp..",
+          message: "Invalid OTP",
           flag: -1,
         });
       }
-    } else if(getServiceProvider){
-        if (getServiceProvider.otp === otp) {
-            //gettime ffrom otp object....
-            //compsre for 30 seconds...
-            const timeDifference = time - getServiceProvider.time;
-            const is30SecondsGap = timeDifference >= 30000;
-            if (is30SecondsGap) {
-              res.status(401).json({
-                message: "otp expired!!",
-                flag: -1,
-              });
-              await otpSchema.findOneAndDelete({ email: email });
-            } else {
-              const hashedPassword = await encrypt.encrypPassword(password);
-      
-              try {
-                const updateServiceProvider = await serviceProviderSchema.findOneAndUpdate(
-                  { email: email },
-                  { $set: { password: hashedPassword } }
-                );
-                console.log("updated serviceprovider...",updateServiceProvider);
-                //password rest...
-                //delete otp record....
-                await otpSchema.findOneAndDelete({ email: email });
-      
-                res.status(200).json({
-                  message: "Password updated successfully",
-                  flag: 1,
-                });
-              } catch (err) {
-                console.log(err);
-                res.status(500).json({
-                  message: "Error in updating password",
-                  flag: -1,
-                });
-              }
-            }
-          } else {
-            ////delete otp record....
-            await otpSchema.findOneAndDelete({ email: email });
-            res.status(401).json({
-              message: "invalid otp..",
-              flag: -1,
-            });
-          }
-    }else {
-      //delete otp record....
-      await otpSchema.findOneAndDelete({ email: email });
+    } else {
+      //delete otp
+      await otpSchema.findOneAndDelete({email : email})
       res.status(500).json({
-        message: "error...",
+        message: "Error...",
         flag: -1,
       });
     }

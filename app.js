@@ -39,6 +39,7 @@ const serviceProviderRoutes = require('./routes/ServiceProviderRoutes.js')
 const serviceRoutes = require('./routes/ServiceRoutes.js')
 const fileUplaodRoutes = require('./routes/FileUploadRoutes.js')
 const bookingRoutes = require('./routes/BookingRoutes.js')
+const addressRoutes = require('./routes/AddressRoutes.js')
 
 
 
@@ -54,6 +55,7 @@ app.use("/serviceproviders",serviceProviderRoutes)
 app.use("/services",serviceRoutes)
 app.use("/upload",fileUplaodRoutes)
 app.use('/bookings',bookingRoutes)
+app.use('/address',addressRoutes)
 
 
 app.listen(PORT,()=>{

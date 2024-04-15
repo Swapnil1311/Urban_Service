@@ -20,6 +20,11 @@ const bookingSchema = new Schema({
     },
     total:{
         type:Number
+    },
+    address:{
+        type:Schema.Types.ObjectId,
+        ref:'Address',
+        default:null
     }
 })
 
